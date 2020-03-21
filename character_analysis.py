@@ -67,14 +67,12 @@ def make_plots(comic_df):
 
     comic_df.plot(kind='scatter', x='Innate Powers', y='Level', color='green')
     plt.savefig('plots\\Innate_to_Power.png')
-    # plt.show()
 
 
 # ***create the clustering model***
 def make_clusters(comic_df):
-    X = comic_df
-
     # find the ideal K
+    X = comic_df
     distortions = []
 
     for i in range(1, 11):
@@ -85,15 +83,15 @@ def make_clusters(comic_df):
     plt.plot(range(1, 11), distortions, marker=0)
     plt.xlabel('Number of clusters')
     plt.ylabel('Distortion')
-    # plt.show()
+    plt.savefig('plots\\ideal_k.png')
 
     # the result of this plot shows that four is perhaps the ideal number of clusters for this set
     final_k = KMeans(n_clusters=4, init='random', n_init=10, max_iter=300, tol=1e-04, random_state=0)
     y_km = final_k.fit_predict(X)
+    X = X.to_numpy()
 
     # plot the clusters
-    #y_km.plot(kind='scatter', x='Innate Powers', y='Level', color='green')
-    plt.scatter(X[y_km == 0, 0], X[y_km == 1, 0], s=50, c='green', marker='o', edgecolor='black', label='cluster 1')
+    plt.scatter(X[y_km == 0, 0], X[y_km == 0, 1], s=50, c='green', marker='o', edgecolor='black', label='cluster 1')
     plt.scatter(X[y_km == 1, 0], X[y_km == 1, 1], s=50, c='blue', marker='o', edgecolor='black', label='cluster 2')
     plt.scatter(X[y_km == 2, 0], X[y_km == 2, 1], s=50, c='purple', marker='o', edgecolor='black', label='cluster 3')
     plt.scatter(X[y_km == 3, 0], X[y_km == 3, 1], s=50, c='red', marker='o', edgecolor='black', label='cluster 4')
@@ -108,9 +106,8 @@ def make_clusters(comic_df):
 
 
 cleaned_comic_df = prepare_data(comic_dataframe)
-# check for any NaNs
-cleaned_comic_df.to_excel('dataframe_values.xlsx')
-
-make_plots(cleaned_comic_df)
+# make_plots(cleaned_comic_df)
 make_clusters(cleaned_comic_df)
 print('Process finished.')
+
+
