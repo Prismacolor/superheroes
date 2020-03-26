@@ -46,6 +46,7 @@ def prepare_data(comic_df):
 
 # ***add in power scores***
 def power_scores(comic_df):
+    powerscore_list = []
     for i, j in comic_df.iterrows():
         base_score = ((j.Immortality * 2) + j.Innate_Powers + j.Magic_Or_Mystic_Powers) * (j.Status + 1)
         combat_score = (j.Healing_Factor * 3) + (j.Combat_Skills + j.Use_of_Combative_Weapons) + \
@@ -54,8 +55,10 @@ def power_scores(comic_df):
         advanced_score = j.Telekinesis_Telepathy + j.Ability_to_Alter_Matter_or_Energy**2 + \
                          j.Ability_to_Alter_Space_Time_Reality**3
         j.Power_Score = (j.Level + 1) * (base_score + combat_score + item_score + advanced_score)
-        j.Power_Score = j.Power_Score
-    print(comic_df)
+        powerscore_list.append(j.Power_Score)
+    comic_df.Power_Score = powerscore_list
+
+    return comic_df
 
 
 # ***compare features and determine relationships***
@@ -122,9 +125,10 @@ def make_clusters(comic_df):
 
 
 cleaned_comic_df = prepare_data(comic_dataframe)
-power_scores(cleaned_comic_df)
+scored_cleaned_comic_df = power_scores(cleaned_comic_df)
 # make_plots(cleaned_comic_df)
-make_clusters(cleaned_comic_df)
+make_clusters(scored_cleaned_comic_df)
+
 print('Process finished.')
 
 
