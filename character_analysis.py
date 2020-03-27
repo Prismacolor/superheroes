@@ -112,10 +112,6 @@ def create_final_model(X_train):
     X_train = X_train.to_numpy()
 
     # plot the clusters
-    '''plt.scatter(X_train[:, 0], X_train[:, 1])
-    plt.scatter(final_k.cluster_centers_[:, 0], final_k.cluster_centers_[:, 1], s=150, c='red')
-    plt.show()'''
-
     plt.scatter(X_train[pred_y == 0, 0], X_train[pred_y == 0, 1], s=50, c='green', marker='o', edgecolor='black', label='cluster 1')
     plt.scatter(X_train[pred_y == 1, 0], X_train[pred_y == 1, 1], s=50, c='blue', marker='o', edgecolor='black', label='cluster 2')
     plt.scatter(X_train[pred_y == 2, 0], X_train[pred_y == 2, 1], s=50, c='purple', marker='o', edgecolor='black', label='cluster 3')
