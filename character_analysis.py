@@ -1,3 +1,4 @@
+import csv
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -54,7 +55,7 @@ def power_scores(comic_df):
         item_score = (j.Use_of_Enhanced_Tech * 2) + (j.Magical_or_Powerful_Weapons_Items * 3)
         advanced_score = j.Telekinesis_Telepathy + j.Ability_to_Alter_Matter_or_Energy**2 + \
                          j.Ability_to_Alter_Space_Time_Reality**3
-        j.Power_Score = (j.Level + 1) * (base_score + combat_score + item_score + advanced_score)
+        j.Power_Score = (j.Level + 1)**2 * (base_score + combat_score + item_score + advanced_score)
         powerscore_list.append(j.Power_Score)
     comic_df.Power_Score = powerscore_list
 
@@ -63,35 +64,31 @@ def power_scores(comic_df):
 
 # ***compare features and determine relationships***
 def make_plots(comic_df):
-    comic_df.plot(kind='scatter', x='Gender', y='Level', color='purple')
+    comic_df.plot(kind='scatter', x='Gender', y='Power_Score', color='purple')
     plt.savefig('plots\\gender_to_Power.png')
 
-    comic_df.plot(kind='scatter', x='Gender', y='Ability to Alter Space/Time/Reality', color='purple')
-    plt.savefig('plots\\gender_to_SRT.png')
-
-    comic_df.plot(kind='scatter', x='Property', y='Level', color='purple')
-    plt.savefig('plots\\property_to_Power.png')
-
-    comic_df.plot(kind='scatter', x='Side', y='Level', color='purple')
+    comic_df.plot(kind='scatter', x='Side', y='Power_Score', color='purple')
     plt.savefig('plots\\side_to_Power.png')
 
-    comic_df.plot(kind='scatter', x='Status', y='Level', color='blue')
+    comic_df.plot(kind='scatter', x='Status', y='Power_Score', color='blue')
     plt.savefig('plots\\Status_to_Power.png')
 
-    comic_df.plot(kind='scatter', x='Ability to Alter Space/Time/Reality', y='Level', color='blue')
+    comic_df.plot(kind='scatter', x='Level', y='Power_Score', color='blue')
     plt.savefig('plots\\STR_to_Power.png')
 
-    comic_df.plot(kind='scatter', x='Magic/Mystic Powers', y='Level', color='green')
+    comic_df.plot(kind='scatter', x='Magic_Or_Mystic_Powers', y='Power_Score', color='green')
     plt.savefig('plots\\Magic_to_Power.png')
 
-    comic_df.plot(kind='scatter', x='Innate Powers', y='Level', color='green')
+    comic_df.plot(kind='scatter', x='Innate_Powers', y='Power_Score', color='green')
     plt.savefig('plots\\Innate_to_Power.png')
 
 
 # ***create the clustering model***
-def make_clusters(comic_df):
+def create_clusters(comic_df):
+    comic_df.to_csv('Datasets\\Updated_Comic_Dataset.csv')
+
     # find the ideal K
-    X = comic_df
+    X = comic_df[5:]
     distortions = []
 
     for i in range(1, 11):
@@ -103,17 +100,25 @@ def make_clusters(comic_df):
     plt.xlabel('Number of clusters')
     plt.ylabel('Distortion')
     plt.savefig('plots\\ideal_k.png')
+    plt.show()
+    # the result of this plot shows that three is perhaps the ideal number of clusters for this set
 
-    # the result of this plot shows that four is perhaps the ideal number of clusters for this set
-    final_k = KMeans(n_clusters=4, init='random', n_init=10, max_iter=300, tol=1e-04, random_state=0)
-    y_km = final_k.fit_predict(X)
-    X = X.to_numpy()
+    return X
+
+
+def create_final_model(X_train):
+    final_k = KMeans(n_clusters=3, init='random', n_init=10, max_iter=300, tol=1e-04, random_state=0)
+    pred_y = final_k.fit_predict(X_train)
+    X_train = X_train.to_numpy()
 
     # plot the clusters
-    plt.scatter(X[y_km == 0, 0], X[y_km == 0, 1], s=50, c='green', marker='o', edgecolor='black', label='cluster 1')
-    plt.scatter(X[y_km == 1, 0], X[y_km == 1, 1], s=50, c='blue', marker='o', edgecolor='black', label='cluster 2')
-    plt.scatter(X[y_km == 2, 0], X[y_km == 2, 1], s=50, c='purple', marker='o', edgecolor='black', label='cluster 3')
-    plt.scatter(X[y_km == 3, 0], X[y_km == 3, 1], s=50, c='red', marker='o', edgecolor='black', label='cluster 4')
+    '''plt.scatter(X_train[:, 0], X_train[:, 1])
+    plt.scatter(final_k.cluster_centers_[:, 0], final_k.cluster_centers_[:, 1], s=150, c='red')
+    plt.show()'''
+
+    plt.scatter(X_train[pred_y == 0, 0], X_train[pred_y == 0, 1], s=50, c='green', marker='o', edgecolor='black', label='cluster 1')
+    plt.scatter(X_train[pred_y == 1, 0], X_train[pred_y == 1, 1], s=50, c='blue', marker='o', edgecolor='black', label='cluster 2')
+    plt.scatter(X_train[pred_y == 2, 0], X_train[pred_y == 2, 1], s=50, c='purple', marker='o', edgecolor='black', label='cluster 3')
 
     # plot the centroids
     plt.scatter(final_k.cluster_centers_[:, 0], final_k.cluster_centers_[:, 1], s=250, marker='*', c='black',
@@ -126,8 +131,9 @@ def make_clusters(comic_df):
 
 cleaned_comic_df = prepare_data(comic_dataframe)
 scored_cleaned_comic_df = power_scores(cleaned_comic_df)
-# make_plots(cleaned_comic_df)
-make_clusters(scored_cleaned_comic_df)
+# make_plots(scored_cleaned_comic_df)
+X = create_clusters(scored_cleaned_comic_df)
+create_final_model(X)
 
 print('Process finished.')
 
