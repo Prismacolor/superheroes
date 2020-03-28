@@ -97,6 +97,7 @@ def create_clusters(comic_df):
         km.fit(X)
         distortions.append(km.inertia_)
 
+    plt.figure(0)
     plt.plot(range(1, 11), distortions, marker=0)
     plt.xlabel('Number of clusters')
     plt.ylabel('Distortion')
@@ -128,13 +129,15 @@ def create_final_model(X_train):
 
     print(correct / len(X))
 
-    '''plt.scatter(X_train[:, 0], X_train[:, 1], label='True Position')
+    plt.figure(1)
+    plt.scatter(X[:, 0], X[:, 1], label='True Position')
     plt.savefig('plots\\X_train.png')
 
     # plot the clusters
-    plt.scatter(X_train[pred_y == 0, 0], X_train[pred_y == 0, 1], s=50, c='green', marker='o', edgecolor='black', label='cluster 1')
-    plt.scatter(X_train[pred_y == 1, 0], X_train[pred_y == 1, 1], s=50, c='blue', marker='o', edgecolor='black', label='cluster 2')
-    plt.scatter(X_train[pred_y == 2, 0], X_train[pred_y == 2, 1], s=50, c='purple', marker='o', edgecolor='black', label='cluster 3')
+    plt.figure(3)
+    plt.scatter(X[pred_y == 0, 0], X[pred_y == 0, 1], s=50, c='green', marker='o', edgecolor='black', label='cluster 1')
+    plt.scatter(X[pred_y == 1, 0], X[pred_y == 1, 1], s=50, c='blue', marker='o', edgecolor='black', label='cluster 2')
+    plt.scatter(X[pred_y == 2, 0], X[pred_y == 2, 1], s=50, c='purple', marker='o', edgecolor='black', label='cluster 3')
 
     # plot the centroids
     plt.scatter(final_k.cluster_centers_[:, 0], final_k.cluster_centers_[:, 1], s=250, marker='*', c='black',
@@ -142,7 +145,7 @@ def create_final_model(X_train):
 
     plt.legend(scatterpoints=1)
     plt.grid()
-    plt.show()'''
+    plt.show()
 
 
 cleaned_comic_df = prepare_data(comic_dataframe)
