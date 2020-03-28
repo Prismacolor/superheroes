@@ -8,6 +8,7 @@ import openpyxl
 # sklearn libraries
 from sklearn.cluster import KMeans
 from sklearn import preprocessing
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 
 
@@ -88,7 +89,7 @@ def create_clusters(comic_df):
     comic_df.to_csv('Datasets\\Updated_Comic_Dataset.csv')
 
     # find the ideal K
-    X = comic_df[5:]
+    X = comic_df.iloc[:, 5:]
     distortions = []
 
     for i in range(1, 11):
@@ -100,16 +101,35 @@ def create_clusters(comic_df):
     plt.xlabel('Number of clusters')
     plt.ylabel('Distortion')
     plt.savefig('plots\\ideal_k.png')
-    plt.show()
+    # plt.show()
     # the result of this plot shows that three is perhaps the ideal number of clusters for this set
 
     return X
 
 
 def create_final_model(X_train):
+    scaler = MinMaxScaler()
     final_k = KMeans(n_clusters=3, init='random', n_init=10, max_iter=300, tol=1e-04, random_state=0)
-    pred_y = final_k.fit_predict(X_train)
-    X_train = X_train.to_numpy()
+    X = np.array(X_train.drop(['Power_Score'], 1).astype(float))
+    X_scaled = scaler.fit_transform(X)
+    y = X_train['Power_Score']
+
+    pred_y = final_k.fit_predict(X)
+    pred_y = final_k.fit(X_scaled)
+
+    # check to see how the model performed
+    correct = 0
+    for i in range(len(X)):
+        predict_me = np.array(X[i].astype(float))
+        predict_me = predict_me.reshape(-1, len(predict_me))
+        prediction = final_k.predict(predict_me)
+        if prediction[0] == y[i]:
+            correct += 1
+
+    print(correct / len(X))
+
+    '''plt.scatter(X_train[:, 0], X_train[:, 1], label='True Position')
+    plt.savefig('plots\\X_train.png')
 
     # plot the clusters
     plt.scatter(X_train[pred_y == 0, 0], X_train[pred_y == 0, 1], s=50, c='green', marker='o', edgecolor='black', label='cluster 1')
@@ -122,7 +142,7 @@ def create_final_model(X_train):
 
     plt.legend(scatterpoints=1)
     plt.grid()
-    plt.show()
+    plt.show()'''
 
 
 cleaned_comic_df = prepare_data(comic_dataframe)
