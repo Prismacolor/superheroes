@@ -9,6 +9,7 @@ import openpyxl
 from sklearn.cluster import KMeans
 from sklearn import preprocessing
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import silhouette_score
 
 
 # ***pull in the data***
@@ -64,27 +65,21 @@ def power_scores(comic_df):
 
 # ***compare features and determine relationships***
 def make_plots(comic_df):
-    plt.figure(8)
     comic_df.plot(kind='scatter', x='Gender', y='Power_Score', color='purple')
     plt.savefig('plots\\Gender_to_Power.png')
 
-    plt.figure(1)
     comic_df.plot(kind='scatter', x='Side', y='Power_Score', color='purple')
     plt.savefig('plots\\Side_to_Power.png')
 
-    plt.figure(2)
     comic_df.plot(kind='scatter', x='Status', y='Power_Score', color='blue')
     plt.savefig('plots\\Status_to_Power.png')
 
-    plt.figure(3)
     comic_df.plot(kind='scatter', x='Level', y='Power_Score', color='blue')
     plt.savefig('plots\\Level_to_Power.png')
 
-    plt.figure(4)
     comic_df.plot(kind='scatter', x='Magic_Or_Mystic_Powers', y='Power_Score', color='green')
     plt.savefig('plots\\Magic_to_Power.png')
 
-    plt.figure(5)
     comic_df.plot(kind='scatter', x='Innate_Powers', y='Power_Score', color='green')
     plt.savefig('plots\\Innate_to_Power.png')
 
@@ -107,7 +102,7 @@ def create_clusters(comic_df):
     plt.xlabel('Number of clusters')
     plt.ylabel('Distortion')
     plt.savefig('plots\\ideal_k.png')
-    # the result of this plot shows that three is the ideal number of clusters for this set
+    # the result of this plot shows that three is the ideal number of clusters for this set TR
 
     return X
 
@@ -121,10 +116,13 @@ def create_final_model(X_train):
     final_k.fit(X_scaled)
 
     # check to see how the model performed
-    # todo evalutation metrics
+    final_score = silhouette_score(X_scaled, final_k.labels_, metric='euclidean')
+    print(final_score)
 
     # plot the clusters
     plt.figure(7)
+    plt.xlabel('Level')
+    plt.ylabel('Power Score')
     plt.scatter(X_scaled[:, 0], X_scaled[:, 1], label='True Position')
     plt.savefig('plots\\X_train.png')
 
