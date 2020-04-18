@@ -9,7 +9,6 @@ import openpyxl
 from sklearn.cluster import KMeans
 from sklearn import preprocessing
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.model_selection import train_test_split
 
 
 # ***pull in the data***
@@ -65,21 +64,27 @@ def power_scores(comic_df):
 
 # ***compare features and determine relationships***
 def make_plots(comic_df):
+    plt.figure(8)
     comic_df.plot(kind='scatter', x='Gender', y='Power_Score', color='purple')
-    plt.savefig('plots\\gender_to_Power.png')
+    plt.savefig('plots\\Gender_to_Power.png')
 
+    plt.figure(1)
     comic_df.plot(kind='scatter', x='Side', y='Power_Score', color='purple')
-    plt.savefig('plots\\side_to_Power.png')
+    plt.savefig('plots\\Side_to_Power.png')
 
+    plt.figure(2)
     comic_df.plot(kind='scatter', x='Status', y='Power_Score', color='blue')
     plt.savefig('plots\\Status_to_Power.png')
 
+    plt.figure(3)
     comic_df.plot(kind='scatter', x='Level', y='Power_Score', color='blue')
-    plt.savefig('plots\\STR_to_Power.png')
+    plt.savefig('plots\\Level_to_Power.png')
 
+    plt.figure(4)
     comic_df.plot(kind='scatter', x='Magic_Or_Mystic_Powers', y='Power_Score', color='green')
     plt.savefig('plots\\Magic_to_Power.png')
 
+    plt.figure(5)
     comic_df.plot(kind='scatter', x='Innate_Powers', y='Power_Score', color='green')
     plt.savefig('plots\\Innate_to_Power.png')
 
@@ -97,13 +102,12 @@ def create_clusters(comic_df):
         km.fit(X)
         distortions.append(km.inertia_)
 
-    plt.figure(0)
+    plt.figure(6)
     plt.plot(range(1, 11), distortions, marker=0)
     plt.xlabel('Number of clusters')
     plt.ylabel('Distortion')
     plt.savefig('plots\\ideal_k.png')
-    # plt.show()
-    # the result of this plot shows that three is perhaps the ideal number of clusters for this set
+    # the result of this plot shows that three is the ideal number of clusters for this set
 
     return X
 
@@ -111,37 +115,22 @@ def create_clusters(comic_df):
 def create_final_model(X_train):
     scaler = MinMaxScaler()
     final_k = KMeans(n_clusters=3, init='random', n_init=10, max_iter=300, tol=1e-04, random_state=0)
-    X = np.array(X_train.drop(['Power_Score'], 1).astype(float))
+    X = X_train.iloc[:, 12:].to_numpy()
     X_scaled = scaler.fit_transform(X)
-    y = X_train['Power_Score']
 
-    pred_y = final_k.fit_predict(X)
-    pred_y = final_k.fit(X_scaled)
+    final_k.fit(X_scaled)
 
     # check to see how the model performed
-    correct = 0
-    for i in range(len(X)):
-        predict_me = np.array(X[i].astype(float))
-        predict_me = predict_me.reshape(-1, len(predict_me))
-        prediction = final_k.predict(predict_me)
-        if prediction[0] == y[i]:
-            correct += 1
-
-    print(correct / len(X))
-
-    plt.figure(1)
-    plt.scatter(X[:, 0], X[:, 1], label='True Position')
-    plt.savefig('plots\\X_train.png')
+    # todo evalutation metrics
 
     # plot the clusters
-    plt.figure(3)
-    plt.scatter(X[pred_y == 0, 0], X[pred_y == 0, 1], s=50, c='green', marker='o', edgecolor='black', label='cluster 1')
-    plt.scatter(X[pred_y == 1, 0], X[pred_y == 1, 1], s=50, c='blue', marker='o', edgecolor='black', label='cluster 2')
-    plt.scatter(X[pred_y == 2, 0], X[pred_y == 2, 1], s=50, c='purple', marker='o', edgecolor='black', label='cluster 3')
+    plt.figure(7)
+    plt.scatter(X_scaled[:, 0], X_scaled[:, 1], label='True Position')
+    plt.savefig('plots\\X_train.png')
 
     # plot the centroids
     plt.scatter(final_k.cluster_centers_[:, 0], final_k.cluster_centers_[:, 1], s=250, marker='*', c='black',
-                edgecolor='black', label='centroids')
+                 edgecolor='black', label='centroids')
 
     plt.legend(scatterpoints=1)
     plt.grid()
@@ -150,7 +139,7 @@ def create_final_model(X_train):
 
 cleaned_comic_df = prepare_data(comic_dataframe)
 scored_cleaned_comic_df = power_scores(cleaned_comic_df)
-# make_plots(scored_cleaned_comic_df)
+make_plots(scored_cleaned_comic_df)
 X = create_clusters(scored_cleaned_comic_df)
 create_final_model(X)
 
